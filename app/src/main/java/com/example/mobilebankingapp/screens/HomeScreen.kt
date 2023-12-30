@@ -14,9 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.mobilebankingapp.presentation.login.UserData
 
 @Composable
-fun HomeScreen(navController: NavController) {
+fun HomeScreen(
+    navController: NavController,
+    userData: UserData?,
+    onSignOut: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -24,7 +29,7 @@ fun HomeScreen(navController: NavController) {
     ) {
         Text(text = "Home")
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = { navController.navigate("login") }) {
+        Button(onClick = onSignOut) {
             Icon(Icons.Default.ArrowForward, contentDescription = null)
             Text(text = "Logout")
         }
