@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -92,22 +93,39 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable("homepage") {
-                            val viewModel = HomeViewModel(FirebaseDbStore(userId = googleAuthUiClient.getSignedInUser()?.userId))
-                            viewModel.googleAuthUiClient = googleAuthUiClient
-                            viewModel.userData = googleAuthUiClient.getSignedInUser()!!
-                            HomeScreen(
-                                userData = viewModel.userData,
-                                firebaseDataFlow = viewModel.userState,
-                                onTransferClick = {viewModel.onTransferClick(navController)},
-                                onAddOrChangeCard = {viewModel.onAddOrChangeCard(navController)},
-                                onBuyDifferentCurrency = {viewModel.onBuyDifferentCurrency(navController)},
-                                onHelpClick = {viewModel.onHelpClick(navController)},
-                                onLogout = {viewModel.onLogout(navController)}
-                            )
+                            val userId = googleAuthUiClient.getSignedInUser()?.userId
+                            if (userId != null) {
+                                val viewModel = HomeViewModel(FirebaseDbStore(userId = userId))
+                                viewModel.googleAuthUiClient = googleAuthUiClient
+                                viewModel.userData = googleAuthUiClient.getSignedInUser()!!
+                                HomeScreen(
+                                    userData = viewModel.userData,
+                                    firebaseDataFlow = viewModel.userState,
+                                    onTransferClick = {viewModel.onTransferClick()},
+                                    onAddOrChangeCard = {viewModel.onAddOrChangeCard()},
+                                    onBuyDifferentCurrency = {viewModel.onBuyDifferentCurrency()},
+                                    onHelpClick = {viewModel.onHelpClick()},
+                                    onLogout = {logOut(googleAuthUiClient, navController)}
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+    }
+    private fun logOut(googleAuthClient: GoogleAuthClient, navController: NavController) {
+        lifecycleScope.launch {
+            googleAuthUiClient.signOut()
+        }
+        navigateToScreen(navController, "login")
+        Toast.makeText(
+            applicationContext,
+            "Signed Out successful",
+            Toast.LENGTH_LONG
+        ).show()
+    }
+    private fun navigateToScreen (navController: NavController, screen: String) {
+        navController.navigate(screen)
     }
 }

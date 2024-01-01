@@ -18,25 +18,19 @@ class HomeViewModel (private val appRepository: AppRepository) : ViewModel() {
 
     val userState: Flow<UserDataModel> by lazy { appRepository.getUserData() }
 
-    fun onTransferClick(navController: NavController) {
+    fun onTransferClick() {
 
     }
 
-    fun onAddOrChangeCard(navController: NavController) {
+    fun onAddOrChangeCard() {
 
     }
 
-    fun onBuyDifferentCurrency(navController: NavController) {
+    fun onBuyDifferentCurrency() {
     }
 
-    fun onHelpClick(navController: NavController) {
+    fun onHelpClick() {
 
-    }
-
-    fun onLogout(navController: NavController) {
-        viewModelScope.launch {
-            navController.navigate("login")
-        }
     }
 
     fun writeDummyDataToFirebase() {
