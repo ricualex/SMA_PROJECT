@@ -65,7 +65,7 @@ fun SignInScreen(
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            DefaultBlueButton(value = "Sign In With Google", onSignInClick = onSignInClick)
+            DefaultBlueButton(value = "Sign In With Google", onButtonClick = onSignInClick)
         }
         Image(
             painter = logoPainter,
