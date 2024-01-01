@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
                     color = Color.Black
                 ) {
                     val navController = rememberNavController()
-                    NavHost(navController = navController , startDestination = "homepage") {
+                    NavHost(navController = navController , startDestination = "login") {
                         composable("login") {
                             val viewModel = viewModel<SignInViewModel>()
 
