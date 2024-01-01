@@ -50,7 +50,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    userData: UserData?,
+    userData: UserData,
     firebaseDataFlow: Flow<UserDataModel>,
     onLogout: () -> Unit,
     onTransferClick: () -> Unit,
@@ -143,7 +143,7 @@ fun HomeScreen(
 }
 
 @Composable
-fun DrawerHeader(userData: UserData?) {
+fun DrawerHeader(userData: UserData) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -156,8 +156,10 @@ fun DrawerHeader(userData: UserData?) {
             Row(
                 modifier = Modifier.padding(start = 10.dp)
             ) {
-                AsyncImage(model = userData?.profilePictureUrl, contentDescription = null)
-                Text(text = "${userData?.username}", style = AppFonts.TitleFontStyle, modifier = Modifier.padding(start = 10.dp))
+                AsyncImage(model = userData.profilePictureUrl, contentDescription = null)
+                if (userData.username != null) {
+                    Text(text = "${userData.username}", style = AppFonts.TitleFontStyle, modifier = Modifier.padding(start = 10.dp))
+                }
             }
             Text(text = "Menu", style = AppFonts.MenuHeaderFontStyle, modifier = Modifier.padding(start = 10.dp))
         }
@@ -195,7 +197,7 @@ fun DrawerBody(
 }
 
 @Composable
-fun WelcomeBox(userData: UserData?, firebaseDataState: UserDataModel?) {
+fun WelcomeBox(userData: UserData, firebaseDataState: UserDataModel) {
     Column {
         RoundBox(
             modifier = Modifier
@@ -206,10 +208,10 @@ fun WelcomeBox(userData: UserData?, firebaseDataState: UserDataModel?) {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Welcome, ${userData?.username?.split(" ")?.firstOrNull()}",
+                        text = "Welcome, ${userData.username?.split(" ")?.first()}",
                         style = AppFonts.TitleFontStyle
                     )
-                    if (firebaseDataState?.balance?.entries?.firstOrNull() != null) {
+                    if (firebaseDataState.balance.entries.firstOrNull() != null) {
                         Text(
                             text = "Current balance:",
                             style = AppFonts.TitleFontStyle

@@ -13,9 +13,9 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.Flow
 
-class FirebaseDbStore (userId: String?) : AppRepository {
+class FirebaseDbStore (userId: String) : AppRepository {
 
-    private val database = FirebaseDatabase.getInstance().reference.child("users").child(userId!!)
+    private val database = FirebaseDatabase.getInstance().reference.child("users").child(userId)
 
     override fun getUserData(): Flow<UserDataModel> = callbackFlow {
         val listener = object : ValueEventListener {
@@ -23,11 +23,11 @@ class FirebaseDbStore (userId: String?) : AppRepository {
                 Log.e("FirebaseDbStore", "getUserData:", p0.toException())
             }
 
-            override fun onDataChange(p0: DataSnapshot) {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
                 val nodeState = mutableStateOf(UserDataModel())
 
-                if (p0.key != null && p0.value != null) {
-                    val nodeValue = p0.getValue(UserDataModel::class.java)
+                if (dataSnapshot.key != null && dataSnapshot.value != null) {
+                    val nodeValue = dataSnapshot.getValue(UserDataModel::class.java)
                     if (nodeValue != null) {
                         nodeState.value = nodeValue
                     }
