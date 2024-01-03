@@ -9,35 +9,24 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import com.example.mobilebankingapp.firebase.FirebaseDbStore
-import com.example.mobilebankingapp.presentation.homepage.HomeViewModel
-import com.example.mobilebankingapp.presentation.login.GoogleAuthClient
-import com.example.mobilebankingapp.presentation.login.SignInViewModel
-import com.example.mobilebankingapp.screens.HomeScreen
-import com.example.mobilebankingapp.screens.SignInScreen
+import com.example.mobilebankingapp.data.NetworkFirebaseRepository
+import com.example.mobilebankingapp.model.UserData
+import com.example.mobilebankingapp.ui.screens.home.HomeViewModel
+import com.example.mobilebankingapp.ui.screens.signin.SignInViewModel
+import com.example.mobilebankingapp.ui.screens.BankingApp
+import com.example.mobilebankingapp.ui.screens.signin.SingInScreen
 import com.example.mobilebankingapp.ui.theme.MobileBankingAppTheme
-import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
-    private val googleAuthUiClient by lazy {
-        GoogleAuthClient(
-            context = applicationContext,
-            oneTapClient = Identity.getSignInClient(applicationContext)
-        )
-    }
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
@@ -47,85 +36,77 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color.Black
                 ) {
-                    val navController = rememberNavController()
-                    NavHost(navController = navController , startDestination = "login") {
-                        composable("login") {
-                            val viewModel = viewModel<SignInViewModel>()
+                    val viewModel: SignInViewModel = viewModel(factory = ViewModelProvider.Factory)
+                    val coroutineScope = rememberCoroutineScope();
+                    val signInState = viewModel.state.collectAsState()
 
-                            val state by viewModel.state.collectAsState()
-                            val launcher = rememberLauncherForActivityResult(
-                                contract = ActivityResultContracts.StartIntentSenderForResult(),
-                                onResult = { result ->
-                                    if(result.resultCode == RESULT_OK) {
-                                        lifecycleScope.launch {
-                                            val signInResult = googleAuthUiClient.signInWithIntent(
-                                                intent = result.data ?: return@launch
-                                            )
-                                            viewModel.onSignInResult(signInResult)
-                                        }
-                                    }
-                                }
+                    if (signInState.value.isSignInSuccesful) {
+                        viewModel.googleAuthRepository.getSignedInUser()?.userId?.let { userId ->
+                            val homeViewModel: HomeViewModel =
+                                viewModel(factory = ViewModelProvider.Factory)
+                            homeViewModel.userId.value = userId
+
+                            val firebaseDataState = homeViewModel.userState.collectAsState(
+                                UserData()
                             )
-
-                            LaunchedEffect(key1 = state.isSignInSuccesful) {
-                                if(state.isSignInSuccesful) {
+                            BankingApp(
+                                userProfile = viewModel.getSignedInUser()!!,
+                                dataModel = firebaseDataState.value,
+                                onLogOutClicked = {
+                                    coroutineScope.launch {
+                                        viewModel.signOut()
+                                    }
+                                    viewModel.resetState()
                                     Toast.makeText(
                                         applicationContext,
-                                        "Signed In successful",
+                                        "Signed Out successful",
                                         Toast.LENGTH_LONG
                                     ).show()
-                                    navController.navigate("homepage")
-                                }
-                            }
-
-                            SignInScreen(
-                                state = state,
-                                onSignInClick = {
-                                    lifecycleScope.launch {
-                                        val signInIntentSender = googleAuthUiClient.signIn()
-                                        launcher.launch(
-                                            IntentSenderRequest.Builder(
-                                                signInIntentSender ?: return@launch
-                                            ).build()
-                                        )
-                                    }
                                 }
                             )
-                        }
-                        composable("homepage") {
-                            val userId = googleAuthUiClient.getSignedInUser()?.userId
-                            if (userId != null) {
-                                val viewModel = HomeViewModel(FirebaseDbStore(userId = userId))
-                                viewModel.googleAuthUiClient = googleAuthUiClient
-                                viewModel.userData = googleAuthUiClient.getSignedInUser()!!
-                                HomeScreen(
-                                    userData = viewModel.userData,
-                                    firebaseDataFlow = viewModel.userState,
-                                    onTransferClick = {viewModel.onTransferClick()},
-                                    onAddOrChangeCard = {viewModel.onAddOrChangeCard()},
-                                    onBuyDifferentCurrency = {viewModel.onBuyDifferentCurrency()},
-                                    onHelpClick = {viewModel.onHelpClick()},
-                                    onLogout = {logOut(googleAuthUiClient, navController)}
-                                )
+                        } ?: Text(text = "Not able to retrieve user id") // TODO: make this pretty
+                    } else {
+                        val launcher = rememberLauncherForActivityResult(
+                            contract = ActivityResultContracts.StartIntentSenderForResult(),
+                            onResult = {
+                                if (it.resultCode == RESULT_OK) {
+                                    coroutineScope.launch {
+                                        val signInResult = viewModel.signInWithIntent(
+                                            intent = it.data ?: return@launch
+                                        )
+                                        viewModel.onSignInResult(signInResult)
+                                    }
+                                }
+                            }
+                        )
+
+                        LaunchedEffect(key1 = signInState.value.isSignInSuccesful) {
+                            if (signInState.value.isSignInSuccesful) {
+                                Toast.makeText(
+                                    applicationContext,
+                                    "Signed In successful",
+                                    Toast.LENGTH_LONG
+                                ).show()
                             }
                         }
+
+                        SingInScreen(
+                            state = signInState.value,
+                            onSignInClicked = {
+                                coroutineScope.launch {
+                                    val signInIntentSender =
+                                        viewModel.signIn()
+                                    launcher.launch(
+                                        IntentSenderRequest.Builder(
+                                            signInIntentSender ?: return@launch
+                                        ).build()
+                                    )
+                                }
+                            }
+                        )
                     }
                 }
             }
         }
-    }
-    private fun logOut(googleAuthClient: GoogleAuthClient, navController: NavController) {
-        lifecycleScope.launch {
-            googleAuthUiClient.signOut()
-        }
-        navigateToScreen(navController, "login")
-        Toast.makeText(
-            applicationContext,
-            "Signed Out successful",
-            Toast.LENGTH_LONG
-        ).show()
-    }
-    private fun navigateToScreen (navController: NavController, screen: String) {
-        navController.navigate(screen)
     }
 }

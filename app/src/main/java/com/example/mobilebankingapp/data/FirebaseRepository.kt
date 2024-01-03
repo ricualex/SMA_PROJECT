@@ -1,8 +1,8 @@
-package com.example.mobilebankingapp.firebase
+package com.example.mobilebankingapp.data
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
-import com.example.mobilebankingapp.AppRepository
+import com.example.mobilebankingapp.model.UserData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -10,24 +10,31 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
-class FirebaseDbStore (userId: String) : AppRepository {
+interface FirebaseRepository {
+    fun getUserData(userId: String): Flow<UserData>
 
-    private val database = FirebaseDatabase.getInstance().reference.child("users").child(userId)
+    fun writeToFirebase(userData: UserData)
 
-    override fun getUserData(): Flow<UserDataModel> = callbackFlow {
+}
+
+class NetworkFirebaseRepository : FirebaseRepository {
+
+    private val database = FirebaseDatabase.getInstance().reference.child("users")
+
+    override fun getUserData(userId: String): Flow<UserData> = callbackFlow {
         val listener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 Log.e("FirebaseDbStore", "getUserData:", p0.toException())
             }
 
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val nodeState = mutableStateOf(UserDataModel())
+                val nodeState = mutableStateOf(UserData())
 
                 if (dataSnapshot.key != null && dataSnapshot.value != null) {
-                    val nodeValue = dataSnapshot.getValue(UserDataModel::class.java)
+                    val nodeValue = dataSnapshot.getValue(UserData::class.java)
                     if (nodeValue != null) {
                         nodeState.value = nodeValue
                     }
@@ -35,11 +42,12 @@ class FirebaseDbStore (userId: String) : AppRepository {
                 trySend(nodeState.value)
             }
         }
-        database.addValueEventListener(listener)
-        awaitClose { database.removeEventListener(listener) }
+        val users = database.child(userId)
+        users.addValueEventListener(listener)
+        awaitClose { users.removeEventListener(listener) }
     }
 
-    override fun writeToFirebase(firebaseUser: UserDataModel) {
+    override fun writeToFirebase(firebaseUser: UserData) {
         val database: FirebaseDatabase = FirebaseDatabase.getInstance()
         val databaseRef: DatabaseReference = database.getReference("users")
         val userId = FirebaseAuth.getInstance().currentUser?.uid

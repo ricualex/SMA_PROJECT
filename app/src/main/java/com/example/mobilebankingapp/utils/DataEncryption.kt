@@ -1,4 +1,4 @@
-package com.example.mobilebankingapp.firebase
+package com.example.mobilebankingapp.utils
 
 import android.content.Context
 import android.security.keystore.KeyGenParameterSpec
@@ -8,7 +8,6 @@ import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
-import kotlin.coroutines.CoroutineContext
 
 fun encryptData(plainText: String, secretKey: Key): ByteArray {
     val cipher = Cipher.getInstance("AES")
