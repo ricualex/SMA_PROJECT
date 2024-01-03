@@ -1,4 +1,4 @@
-package com.example.mobilebankingapp.components
+package com.example.mobilebankingapp.ui.screens.drawer
 
 import androidx.compose.ui.graphics.vector.ImageVector
 

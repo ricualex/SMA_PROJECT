@@ -1,4 +1,4 @@
-package com.example.mobilebankingapp.presentation.login
+package com.example.mobilebankingapp.ui.screens.signin
 
 data class SignInState(
     val isSignInSuccesful: Boolean = false,

@@ -1,6 +1,5 @@
 package com.example.mobilebankingapp.components
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -10,13 +9,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import com.example.mobilebankingapp.ui.screens.BankingAppScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppBar(
-    onNavigationIconClick: () -> Unit
+    crtScreen: BankingAppScreen,
+    onNavigationIconClicked: () -> Unit
 ) {
     TopAppBar(
         colors = TopAppBarDefaults.mediumTopAppBarColors(
@@ -24,11 +24,15 @@ fun AppBar(
             titleContentColor = Color.White
         ),
         title = {
-            Text(text = "Banking App")
+            Text(text = crtScreen.title)
         },
         navigationIcon = {
-            IconButton(onClick = onNavigationIconClick) {
-                Icon(imageVector = Icons.Default.Menu, contentDescription = "Toggle drawer", tint = Color.White)
+            IconButton(onClick = onNavigationIconClicked) {
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Toggle drawer",
+                    tint = Color.White
+                )
             }
         }
     )

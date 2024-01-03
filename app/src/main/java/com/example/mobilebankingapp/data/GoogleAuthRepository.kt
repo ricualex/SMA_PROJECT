@@ -1,9 +1,9 @@
-package com.example.mobilebankingapp.presentation.login
+package com.example.mobilebankingapp.data
 
-import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
-import com.example.mobilebankingapp.R
+import com.example.mobilebankingapp.model.SignInResult
+import com.example.mobilebankingapp.model.UserProfile
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.BeginSignInRequest.GoogleIdTokenRequestOptions
 import com.google.android.gms.auth.api.identity.SignInClient
@@ -13,24 +13,34 @@ import kotlinx.coroutines.tasks.await
 import java.lang.Exception
 import java.util.concurrent.CancellationException
 
-class GoogleAuthClient (
-    private val context: Context,
+interface GoogleAuthRepository {
+    suspend fun signIn(): IntentSender?
+    suspend fun signInWithIntent(intent: Intent): SignInResult
+    suspend fun signOut()
+    fun getSignedInUser(): UserProfile?
+
+}
+
+// TODO: make this a repository ?
+class NetworkGoogleAuthRepository(
+    private val serverClientId: String,
     private val oneTapClient: SignInClient
-) {
+) : GoogleAuthRepository {
     private val auth = FirebaseAuth.getInstance()
-    suspend fun signIn(): IntentSender? {
+    override suspend fun signIn(): IntentSender? {
         val result = try {
             oneTapClient.beginSignIn(
                 buildSignInRequest()
             ).await()
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
-            if(e is CancellationException) throw e
+            if (e is CancellationException) throw e
             null
         }
         return result?.pendingIntent?.intentSender
     }
-    suspend fun signInWithIntent(intent: Intent): SignInResult {
+
+    override suspend fun signInWithIntent(intent: Intent): SignInResult {
         val credential = oneTapClient.getSignInCredentialFromIntent(intent)
         val googleIdToken = credential.googleIdToken
         val googleCredentials = GoogleAuthProvider.getCredential(googleIdToken, null)
@@ -38,7 +48,7 @@ class GoogleAuthClient (
             val user = auth.signInWithCredential(googleCredentials).await().user
             SignInResult(
                 data = user?.run {
-                    UserData(
+                    UserProfile(
                         userId = uid,
                         username = displayName,
                         profilePictureUrl = photoUrl?.toString()
@@ -48,23 +58,23 @@ class GoogleAuthClient (
             )
         } catch (e: Exception) {
             e.printStackTrace()
-            if(e is CancellationException) throw e
+            if (e is CancellationException) throw e
             SignInResult(data = null, errorMessage = e.message)
         }
     }
 
-    suspend fun signOut() {
+    override suspend fun signOut() {
         try {
             oneTapClient.signOut().await()
             auth.signOut()
         } catch (e: Exception) {
             e.printStackTrace()
-            if(e is CancellationException) throw e
+            if (e is CancellationException) throw e
         }
     }
 
-    fun getSignedInUser(): UserData? = auth.currentUser?.run {
-        UserData(
+    override fun getSignedInUser(): UserProfile? = auth.currentUser?.run {
+        UserProfile(
             userId = uid,
             username = displayName,
             profilePictureUrl = photoUrl?.toString()
@@ -78,7 +88,7 @@ class GoogleAuthClient (
                     .builder()
                     .setSupported(true)
                     .setFilterByAuthorizedAccounts(false)
-                    .setServerClientId(context.getString(R.string.default_web_client_id))
+                    .setServerClientId(serverClientId)
                     .build()
             )
             .setAutoSelectEnabled(true)
