@@ -14,17 +14,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 
 interface FirebaseRepository {
-    fun getUserData(): Flow<UserData>
+    fun getUserData(userId: String): Flow<UserData>
 
     fun writeToFirebase(userData: UserData)
 
 }
 
-class NetworkFirebaseRepository(userId: String) : FirebaseRepository {
+class NetworkFirebaseRepository : FirebaseRepository {
 
-    private val database = FirebaseDatabase.getInstance().reference.child("users").child(userId)
+    private val database = FirebaseDatabase.getInstance().reference.child("users")
 
-    override fun getUserData(): Flow<UserData> = callbackFlow {
+    override fun getUserData(userId: String): Flow<UserData> = callbackFlow {
         val listener = object : ValueEventListener {
             override fun onCancelled(p0: DatabaseError) {
                 Log.e("FirebaseDbStore", "getUserData:", p0.toException())
@@ -42,8 +42,9 @@ class NetworkFirebaseRepository(userId: String) : FirebaseRepository {
                 trySend(nodeState.value)
             }
         }
-        database.addValueEventListener(listener)
-        awaitClose { database.removeEventListener(listener) }
+        val users = database.child(userId)
+        users.addValueEventListener(listener)
+        awaitClose { users.removeEventListener(listener) }
     }
 
     override fun writeToFirebase(firebaseUser: UserData) {

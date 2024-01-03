@@ -36,13 +36,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = Color.Black
                 ) {
-                    val viewModel: SignInViewModel = viewModel(factory = SignInViewModel.Factory)
+                    val viewModel: SignInViewModel = viewModel(factory = ViewModelProvider.Factory)
                     val coroutineScope = rememberCoroutineScope();
                     val signInState = viewModel.state.collectAsState()
 
                     if (signInState.value.isSignInSuccesful) {
                         viewModel.googleAuthRepository.getSignedInUser()?.userId?.let { userId ->
-                            val homeViewModel = HomeViewModel(NetworkFirebaseRepository(userId = userId))
+                            val homeViewModel: HomeViewModel =
+                                viewModel(factory = ViewModelProvider.Factory)
+                            homeViewModel.userId.value = userId
+
                             val firebaseDataState = homeViewModel.userState.collectAsState(
                                 UserData()
                             )

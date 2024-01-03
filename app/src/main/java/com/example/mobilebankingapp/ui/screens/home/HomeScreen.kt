@@ -46,7 +46,6 @@ fun HomeScreen(
     }
 }
 
-
 @Composable
 fun WelcomeBox(userProfile: UserProfile, firebaseDataState: UserData) {
     Column {
@@ -63,13 +62,13 @@ fun WelcomeBox(userProfile: UserProfile, firebaseDataState: UserData) {
                         text = "Welcome, ${userProfile.username?.split(" ")?.first()}",
                         style = AppFonts.TitleFontStyle
                     )
-                    if (firebaseDataState.balance.entries.firstOrNull() != null) {
+                    firebaseDataState.balance.entries.firstOrNull()?.let {
                         Text(
                             text = "Current balance:",
                             style = AppFonts.TitleFontStyle
                         )
                         Text(
-                            text = "${firebaseDataState.balance.entries.firstOrNull()?.value} ${firebaseDataState.balance.entries.firstOrNull()?.key}",
+                            text = "${it.value} ${it.key}",
                             style = AppFonts.TitleFontStyle
                         )
                     }

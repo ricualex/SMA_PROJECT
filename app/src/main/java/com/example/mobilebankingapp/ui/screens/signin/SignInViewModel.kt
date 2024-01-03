@@ -11,6 +11,7 @@ import com.example.mobilebankingapp.BankingApplication
 import com.example.mobilebankingapp.data.GoogleAuthRepository
 import com.example.mobilebankingapp.model.SignInResult
 import com.example.mobilebankingapp.model.UserProfile
+import com.example.mobilebankingapp.ui.screens.home.HomeViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -44,12 +45,5 @@ class SignInViewModel(val googleAuthRepository: GoogleAuthRepository) : ViewMode
     fun getSignedInUser(): UserProfile? = googleAuthRepository.getSignedInUser()
 
     companion object {
-        val Factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[APPLICATION_KEY] as BankingApplication)
-                val repo = application.container.googleAuthRepository
-                SignInViewModel(repo)
-            }
-        }
     }
 }
