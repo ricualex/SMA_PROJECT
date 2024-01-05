@@ -2,7 +2,6 @@ package com.example.mobilebankingapp
 
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
@@ -14,19 +13,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.mobilebankingapp.data.NetworkFirebaseRepository
-import com.example.mobilebankingapp.model.UserData
-import com.example.mobilebankingapp.ui.screens.home.HomeViewModel
-import com.example.mobilebankingapp.ui.screens.signin.SignInViewModel
 import com.example.mobilebankingapp.ui.screens.BankingApp
+import com.example.mobilebankingapp.ui.screens.signin.SignInViewModel
 import com.example.mobilebankingapp.ui.screens.signin.SingInScreen
 import com.example.mobilebankingapp.ui.theme.MobileBankingAppTheme
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.launch
 
-class MainActivity : ComponentActivity() {
+class MainActivity :  FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
@@ -34,7 +30,6 @@ class MainActivity : ComponentActivity() {
             MobileBankingAppTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = Color.Black
                 ) {
                     val viewModel: SignInViewModel = viewModel(factory = ViewModelProvider.Factory)
                     val coroutineScope = rememberCoroutineScope();
@@ -42,16 +37,10 @@ class MainActivity : ComponentActivity() {
 
                     if (signInState.value.isSignInSuccesful) {
                         viewModel.googleAuthRepository.getSignedInUser()?.userId?.let { userId ->
-                            val homeViewModel: HomeViewModel =
-                                viewModel(factory = ViewModelProvider.Factory)
-                            homeViewModel.userId.value = userId
-
-                            val firebaseDataState = homeViewModel.userState.collectAsState(
-                                UserData()
-                            )
                             BankingApp(
+                                activity = this,
                                 userProfile = viewModel.getSignedInUser()!!,
-                                dataModel = firebaseDataState.value,
+                                userId = userId,
                                 onLogOutClicked = {
                                     coroutineScope.launch {
                                         viewModel.signOut()

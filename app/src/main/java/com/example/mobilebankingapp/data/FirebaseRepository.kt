@@ -2,6 +2,7 @@ package com.example.mobilebankingapp.data
 
 import android.util.Log
 import androidx.compose.runtime.mutableStateOf
+import com.example.mobilebankingapp.model.CreditCard
 import com.example.mobilebankingapp.model.UserData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
@@ -15,9 +16,10 @@ import kotlinx.coroutines.flow.callbackFlow
 
 interface FirebaseRepository {
     fun getUserData(userId: String): Flow<UserData>
-
-    fun writeToFirebase(userData: UserData)
-
+    fun addUser(userData: UserData)
+    fun addCard(card: CreditCard)
+    fun deleteCard(cardId: String)
+    fun setDefaultCard(cardId: String, prevCardId: String? = null)
 }
 
 class NetworkFirebaseRepository : FirebaseRepository {
@@ -47,10 +49,36 @@ class NetworkFirebaseRepository : FirebaseRepository {
         awaitClose { users.removeEventListener(listener) }
     }
 
-    override fun writeToFirebase(firebaseUser: UserData) {
+    override fun addUser(userData: UserData) {
         val database: FirebaseDatabase = FirebaseDatabase.getInstance()
         val databaseRef: DatabaseReference = database.getReference("users")
         val userId = FirebaseAuth.getInstance().currentUser?.uid
-        databaseRef.child(userId!!).setValue(firebaseUser)
+        databaseRef.child(userId!!).setValue(userData)
+    }
+
+    override fun addCard(card: CreditCard) {
+        val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseRef: DatabaseReference = database.getReference("users")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        databaseRef.child(userId!!).child("cards").push().setValue(card)
+    }
+
+    override fun deleteCard(cardId: String) {
+        val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseRef: DatabaseReference = database.getReference("users")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        databaseRef.child(userId!!).child("cards").child(cardId).removeValue()
+    }
+
+
+    override fun setDefaultCard(cardId: String, prevCardId: String?) {
+        val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseRef: DatabaseReference = database.getReference("users")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val cards = databaseRef.child(userId!!).child("cards")
+        prevCardId?.run {
+            cards.child(this).child("default").setValue(false)
+                .onSuccessTask { cards.child(cardId).child("default").setValue(true) }
+        } ?: cards.child(cardId).child("default").setValue(true)
     }
 }
