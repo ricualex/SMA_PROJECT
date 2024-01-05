@@ -9,5 +9,5 @@ data class UserData(
 //    val cnp: String = "",
 //    val age: String = "",
     val balance: Map<String, Int> = mapOf(),
-    val cards: List<CreditCard> = emptyList()
+    val cards: Map<String, CreditCard> = mapOf()
 )

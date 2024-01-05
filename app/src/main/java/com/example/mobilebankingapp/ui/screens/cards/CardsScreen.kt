@@ -1,108 +1,174 @@
 package com.example.mobilebankingapp.ui.screens.cards
 
 import android.app.Activity
-import android.nfc.NfcAdapter
-import android.nfc.NfcAdapter.ReaderCallback
-import android.nfc.Tag
-import android.nfc.tech.IsoDep
-import android.os.Bundle
-import android.util.Log
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.example.mobilebankingapp.nfc.PcscProvider
-import com.github.devnied.emvnfccard.exception.CommunicationException
-import com.github.devnied.emvnfccard.parser.EmvTemplate
-import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.runBlocking
-import java.io.Closeable
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mobilebankingapp.ViewModelProvider
+import com.example.mobilebankingapp.model.CreditCard
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CardsScreen() {
-}
-
-@Composable
-fun RegisterCard(activity: Activity, modifier: Modifier = Modifier) {
-    Button(onClick = {
-        CardReaderCallback(activity).use {
-            println(it.getResult())
+fun CardsScreen(
+    activity: Activity,
+    cards: List<Pair<String, CreditCard>>,
+    onCardAdded: (CreditCard) -> Unit,
+    onCardDeleted: (String) -> Unit,
+    onCardSetDefault: (String, String?) -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        val pagerState = rememberPagerState {
+            cards.size
         }
-    }) {
-        Text(text = "Test")
-    }
-}
 
-sealed interface CardReaderState {
-    data class Failure(val msg: String) : CardReaderState
-    data class Success(val cardNumber: String) : CardReaderState
-}
+        if (cards.isNotEmpty()) {
+            HorizontalPager(state = pagerState, key = { it }) {
+                val cardViewModel: CreditCardViewModel =
+                    viewModel(key = cards[it].first, factory = ViewModelProvider.Factory)
+                cardViewModel.creditCard.value = cards[it].second
 
-
-class CardReaderCallback(private val activity: Activity) : ReaderCallback, Closeable {
-    private val nfcAdapter = NfcAdapter.getDefaultAdapter(activity)
-
-    private val channel = Channel<CardReaderState>() {
-    }
-
-
-    init {
-        val options = Bundle()
-        options.putInt(NfcAdapter.EXTRA_READER_PRESENCE_CHECK_DELAY, 250)
-
-        nfcAdapter.enableReaderMode(
-            activity,
-            this,
-            NfcAdapter.FLAG_READER_NFC_A or
-                    NfcAdapter.FLAG_READER_NFC_B or
-                    NfcAdapter.FLAG_READER_NFC_F or
-                    NfcAdapter.FLAG_READER_NFC_V or
-                    NfcAdapter.FLAG_READER_NFC_BARCODE or
-                    NfcAdapter.FLAG_READER_NO_PLATFORM_SOUNDS,
-            options
-        )
-    }
-
-    override fun onTagDiscovered(tag: Tag?) {
-        try {
-            IsoDep.get(tag)?.use {
-                it.connect()
-                val config = EmvTemplate.Config()
-                    .setContactLess(true)
-                    .setReadAllAids(true)
-                    .setReadTransactions(true)
-                    .setRemoveDefaultParsers(false)
-                    .setReadAt(true)
-
-                val provider = PcscProvider(it)
-                val parser = EmvTemplate.Builder()
-                    .setProvider(provider)
-                    .setConfig(config)
-                    .build()
-
-                val card = parser.readEmvCard()
-                runBlocking {
-                    channel.send(CardReaderState.Success(card.toString()))
-                }
-            }
-                ?: throw RuntimeException()
-        } catch (e: CommunicationException) {
-            runBlocking {
-                channel.send(
-                    CardReaderState.Failure(
-                        e.message ?: "No card found, make sure you hold the card still"
-                    )
+                CreditCardForm(
+                    viewModel = cardViewModel,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 )
             }
         }
-    }
 
-    override fun close() {
-        nfcAdapter.disableReaderMode(activity)
-        Log.d("Card", "disable reader mode")
-    }
+        var showDialog by remember { mutableStateOf(false) }
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Button(onClick = { showDialog = true }) {
+                    Text(text = "Add new card")
+                }
+                Button(
+                    onClick = {
+                        val crtDefaultId = cards.find { it.second.default }?.first
+                        onCardSetDefault(cards[pagerState.currentPage].first, crtDefaultId)
+                    },
+                    enabled = cards.isNotEmpty() && !cards[pagerState.currentPage].second.default
+                ) {
+                    Text(text = "Set as default")
+                }
+                Button(
+                    onClick = { onCardDeleted(cards[pagerState.currentPage].first) },
+                    enabled = cards.isNotEmpty()
+                ) {
+                    Text(text = "Delete")
+                }
+            }
+        }
 
-    fun getResult() = runBlocking { channel.receive() }
+        if (showDialog) {
+            val newCardViewModel: CreditCardViewModel =
+                viewModel(factory = ViewModelProvider.Factory)
+            if (cards.isEmpty()) {
+                newCardViewModel.updateDefault(true)
+            }
+            Dialog(onDismissRequest = {
+                showDialog = false
+                newCardViewModel.resetState()
+            }) {
+                Card(
+                    modifier = Modifier
+                        .height(250.dp)
+                        .fillMaxWidth()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CreditCardForm(
+                            viewModel = newCardViewModel,
+                            readOnly = false,
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            TextButton(
+                                onClick = {
+                                    showDialog = false
+                                    newCardViewModel.resetState()
+                                },
+                                modifier = Modifier.padding(4.dp),
+                            ) {
+                                Text("Cancel")
+                            }
+
+                            val ctx = LocalContext.current;
+                            if (ctx.packageManager.hasSystemFeature(PackageManager.FEATURE_NFC)) {
+                                var showScanError by remember { mutableStateOf(false) }
+                                TextButton(onClick = {
+                                    CardReaderCallback(
+                                        activity,
+                                        newCardViewModel::updateCreditCard
+                                    ) { showScanError = true }
+                                }) {
+                                    Text("Scan")
+                                }
+                                if (showScanError) {
+                                    Toast.makeText(
+                                        ctx,
+                                        "Card scan failed",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+
+                            TextButton(
+                                onClick = {
+                                    onCardAdded(newCardViewModel.creditCard.value)
+                                    showDialog = false
+                                    newCardViewModel.resetState()
+                                },
+                                enabled = newCardViewModel.isCreditCardValid(),
+                                modifier = Modifier.padding(4.dp),
+                            ) {
+                                Text("Confirm")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

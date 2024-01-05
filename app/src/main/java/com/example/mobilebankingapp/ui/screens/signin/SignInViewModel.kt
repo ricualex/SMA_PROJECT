@@ -3,15 +3,9 @@ package com.example.mobilebankingapp.ui.screens.signin
 import android.content.Intent
 import android.content.IntentSender
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import com.example.mobilebankingapp.BankingApplication
 import com.example.mobilebankingapp.data.GoogleAuthRepository
 import com.example.mobilebankingapp.model.SignInResult
 import com.example.mobilebankingapp.model.UserProfile
-import com.example.mobilebankingapp.ui.screens.home.HomeViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
