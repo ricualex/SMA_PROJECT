@@ -26,6 +26,7 @@ import com.example.mobilebankingapp.model.UserData
 import com.example.mobilebankingapp.model.UserProfile
 import com.example.mobilebankingapp.ui.screens.cards.CardsScreen
 import com.example.mobilebankingapp.ui.screens.drawer.DrawerScreen
+import com.example.mobilebankingapp.ui.screens.home.ApiViewModel
 import com.example.mobilebankingapp.ui.screens.home.HomeScreen
 import com.example.mobilebankingapp.ui.screens.home.UserViewModel
 import kotlinx.coroutines.launch
@@ -45,6 +46,7 @@ fun BankingApp(
     onLogOutClicked: () -> Unit
 ) {
     val userViewModel: UserViewModel = viewModel(factory = ViewModelProvider.Factory)
+    val apiViewModel: ApiViewModel = viewModel(factory = ViewModelProvider.Factory)
     userViewModel.updateUserId(userId)
 
     val userData = userViewModel.userState.collectAsState(
@@ -60,6 +62,7 @@ fun BankingApp(
     val crtScreen = BankingAppScreen.valueOf(
         backStackEntry?.destination?.route ?: BankingAppScreen.Home.name
     )
+    val exchangeData = apiViewModel.exchangeRateDataState.value
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -97,7 +100,7 @@ fun BankingApp(
                     startDestination = BankingAppScreen.Home.name
                 ) {
                     composable(route = BankingAppScreen.Home.name) {
-                        HomeScreen(userProfile = userProfile, dataModel = userData.value)
+                        HomeScreen(userProfile = userProfile, dataModel = userData.value, exchangeData = exchangeData)
                     }
                     composable(route = BankingAppScreen.Cards.name) {
                         CardsScreen(

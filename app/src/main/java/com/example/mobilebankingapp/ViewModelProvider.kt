@@ -5,6 +5,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.mobilebankingapp.ui.screens.cards.CreditCardViewModel
+import com.example.mobilebankingapp.ui.screens.home.ApiViewModel
 import com.example.mobilebankingapp.ui.screens.home.UserViewModel
 import com.example.mobilebankingapp.ui.screens.signin.SignInViewModel
 
@@ -23,6 +24,11 @@ object ViewModelProvider {
 
         initializer {
             CreditCardViewModel()
+        }
+
+        initializer {
+            val repo = getApplication().container.retrofitRepository
+            ApiViewModel(repo)
         }
     }
 
