@@ -26,6 +26,7 @@ import com.example.mobilebankingapp.model.UserData
 import com.example.mobilebankingapp.model.UserProfile
 import com.example.mobilebankingapp.ui.screens.cards.CardsScreen
 import com.example.mobilebankingapp.ui.screens.drawer.DrawerScreen
+import com.example.mobilebankingapp.ui.screens.exchange.CurrencyExchangeScreen
 import com.example.mobilebankingapp.ui.screens.home.ApiViewModel
 import com.example.mobilebankingapp.ui.screens.home.HomeScreen
 import com.example.mobilebankingapp.ui.screens.home.UserViewModel
@@ -34,7 +35,8 @@ import kotlinx.coroutines.launch
 
 enum class BankingAppScreen(val title: String) {
     Home("Home"),
-    Cards("Credit Cards")
+    Cards("Credit Cards"),
+    Exchange("Currency exchange")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,6 +50,7 @@ fun BankingApp(
     val userViewModel: UserViewModel = viewModel(factory = ViewModelProvider.Factory)
     val apiViewModel: ApiViewModel = viewModel(factory = ViewModelProvider.Factory)
     userViewModel.updateUserId(userId)
+    apiViewModel.updateUserId(userId)
 
     val userData = userViewModel.userState.collectAsState(
         UserData()
@@ -93,6 +96,19 @@ fun BankingApp(
                         drawerState.close()
                     }
                 },
+                onHomeClicked = {
+                    navController.navigate(BankingAppScreen.Home.name)
+                    coroutineScope.launch {
+                        drawerState.close()
+                    }
+                },
+                onExchangeClicked = {
+                    navController.navigate(BankingAppScreen.Exchange.name)
+                    // TODO: this can be done better
+                    coroutineScope.launch {
+                        drawerState.close()
+                    }
+                },
                 onLogOutClicked = onLogOutClicked
             ) {
                 NavHost(
@@ -110,6 +126,9 @@ fun BankingApp(
                             onCardDeleted = userViewModel::deleteCard,
                             onCardSetDefault = userViewModel::setDefaultCard
                         )
+                    }
+                    composable(route = BankingAppScreen.Exchange.name) {
+                        CurrencyExchangeScreen(exchangeDataViewModel = apiViewModel, dataModel = userData.value)
                     }
                 }
             }

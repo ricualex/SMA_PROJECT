@@ -13,6 +13,8 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
+import java.util.Currency
 
 interface FirebaseRepository {
     fun getUserData(userId: String): Flow<UserData>
@@ -20,6 +22,7 @@ interface FirebaseRepository {
     fun addCard(card: CreditCard)
     fun deleteCard(cardId: String)
     fun setDefaultCard(cardId: String, prevCardId: String? = null)
+    fun updateBalance(currencyFrom: String, currencyTo: String, amountFrom: Double, amountTo: Double)
 }
 
 class NetworkFirebaseRepository : FirebaseRepository {
@@ -81,4 +84,14 @@ class NetworkFirebaseRepository : FirebaseRepository {
                 .onSuccessTask { cards.child(cardId).child("default").setValue(true) }
         } ?: cards.child(cardId).child("default").setValue(true)
     }
+
+    override fun updateBalance(currencyFrom: String, currencyTo: String, amountFrom: Double, amountTo: Double) {
+        val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseRef: DatabaseReference = database.getReference("users")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        val databaseUserData = getUserData(userId!!)
+        databaseRef.child(userId).child("balance").child(currencyFrom).setValue(amountFrom)
+        databaseRef.child(userId).child("balance").child(currencyTo).setValue(amountTo)
+    }
+
 }
