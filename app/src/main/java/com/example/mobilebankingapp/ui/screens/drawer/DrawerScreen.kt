@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Send
@@ -42,6 +43,8 @@ fun DrawerScreen(
     userProfile: UserProfile,
     onCardsClicked: () -> Unit,
     onLogOutClicked: () -> Unit,
+    onHomeClicked: () -> Unit,
+    onExchangeClicked: () -> Unit,
     content: @Composable () -> Unit
 ) {
     ModalNavigationDrawer(
@@ -52,6 +55,13 @@ fun DrawerScreen(
                 DrawerHeader(userProfile)
                 DrawerBody(
                     items = listOf(
+                        MenuItem(
+                            id = "home",
+                            title = "Home",
+                            contentDescription = "Go To Home",
+                            icon = Icons.Default.Home,
+                            onClick = onHomeClicked
+                        ),
                         MenuItem(
                             id = "transfer",
                             title = "Transfer",
@@ -71,7 +81,7 @@ fun DrawerScreen(
                             title = "Money Exchange",
                             contentDescription = "Buy/Sell currency",
                             icon = Icons.Default.Refresh,
-                            onClick = {}
+                            onClick = onExchangeClicked
                         ),
                         MenuItem(
                             id = "help",

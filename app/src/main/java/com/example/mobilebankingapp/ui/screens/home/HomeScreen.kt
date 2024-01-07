@@ -95,7 +95,7 @@ fun WelcomeBox(userProfile: UserProfile, firebaseDataState: UserData) {
                             style = AppFonts.TitleFontStyle
                         )
                         Text(
-                            text = "${it.value} ${it.key}",
+                            text = "${String.format("%.2f", it.value)} ${it.key}",
                             style = AppFonts.TitleFontStyle
                         )
                     }
@@ -106,8 +106,8 @@ fun WelcomeBox(userProfile: UserProfile, firebaseDataState: UserData) {
 }
 @Composable
 fun ApiBox(apiExchangeRateData: ExchangeRateResponse) {
-    var currencyFrom by remember { mutableStateOf("10") }
-    var currencyTo by remember { mutableStateOf("10") }
+    var currencyFrom by remember { mutableStateOf("0") }
+    var currencyTo by remember { mutableStateOf("0") }
     val usdPainter = painterResource(id = R.drawable.usd)
     val euroPainter = painterResource(id = R.drawable.euro)
 

@@ -8,6 +8,6 @@ data class UserData(
 //    val dateOfBirth: String = "",
 //    val cnp: String = "",
 //    val age: String = "",
-    val balance: Map<String, Int> = mapOf(),
+    val balance: Map<String, Double> = mapOf(),
     val cards: Map<String, CreditCard> = mapOf()
 )

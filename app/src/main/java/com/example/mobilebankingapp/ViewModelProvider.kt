@@ -27,8 +27,9 @@ object ViewModelProvider {
         }
 
         initializer {
-            val repo = getApplication().container.retrofitRepository
-            ApiViewModel(repo)
+            val retrofitRepo = getApplication().container.retrofitRepository
+            val firebaseRepo = getApplication().container.firebaseRepository
+            ApiViewModel(retrofitRepo, firebaseRepo)
         }
     }
 
