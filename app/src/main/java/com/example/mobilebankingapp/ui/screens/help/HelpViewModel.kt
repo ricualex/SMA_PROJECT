@@ -13,55 +13,26 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 
-class HelpViewModel (private val retrofitRepository: RetrofitRepository) : ViewModel() {
+class HelpViewModel(private val retrofitRepository: RetrofitRepository, private val locationHandler: LocationHandler) : ViewModel() {
     val currentLocation: MutableState<LatLng> = mutableStateOf(LatLng(44.634775, 22.664495))
-    var locationHandler: LocationHandler? = null
-    private var locationCallback: LocationCallback? = null
+    val nearbyAtmList: MutableState<List<GoogleMapsApiResponse>> = mutableStateOf(listOf())
+    private lateinit var locationCallback: LocationCallback
 
-    val nearbyAtmList: MutableState<MutableList<GoogleMapsApiResponse>> =
-        try {
-            retrofitRepository.getNearbyAtms("${currentLocation.value.latitude},${currentLocation.value.longitude}")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
-        }
+    init {
+        setupLocation()
+    }
 
-    fun setupLocation() {
+    private fun setupLocation() {
         this.locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 locationResult.lastLocation.let {
-//                    try {
-//                        nearbyAtmList.value = retrofitRepository.getNearbyAtms("${it.latitude},${it.longitude}").value
-//                    } catch (e: Exception) {
-//                        e.printStackTrace()
-//                        throw e
-//                    }
                     currentLocation.value = LatLng(it.latitude, it.longitude)
+                    retrofitRepository.getNearbyAtms("${currentLocation.value.latitude}, ${currentLocation.value.longitude}") {
+                        nearbyAtmList.value = it
+                    }
                 }
             }
         }
-        locationHandler?.registerLocationListener(locationCallback!!)
+        locationHandler.registerLocationListener(locationCallback)
     }
-
-    fun getAtmsData(
-        latitude: String,
-        longitude: String
-    ): MutableState<MutableList<GoogleMapsApiResponse>> {
-        try {
-            return retrofitRepository.getNearbyAtms("$latitude, $longitude")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            throw e
-        }
-    }
-
-//    fun updateLocation(latitude: String, longitude: String) {
-//        nearbyAtmList.value =
-//            try {
-//                retrofitRepository.getNearbyAtms("${latitude},${longitude}").value
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                throw e
-//            }
-//    }
 }

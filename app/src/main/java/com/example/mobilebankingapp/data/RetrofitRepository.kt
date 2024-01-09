@@ -33,8 +33,8 @@ interface GoogleMapsApiService {
 }
 
 interface RetrofitRepository {
-    fun fetchExchangeRates() : MutableState<ExchangeRateResponse>
-    fun getNearbyAtms(location: String) : MutableState<MutableList<GoogleMapsApiResponse>>
+    fun fetchExchangeRates(): MutableState<ExchangeRateResponse>
+    fun getNearbyAtms(location: String, callback: (List<GoogleMapsApiResponse>) -> Unit)
 
 }
 
@@ -42,14 +42,14 @@ class NetworkRetrofitRepository : RetrofitRepository {
     private val apiService = ExchangeRateRetrofitInstance.create()
     private val mapsApiService = GoogleMapsRetrofitInstance.create()
 
-    override fun fetchExchangeRates() : MutableState<ExchangeRateResponse> {
+    override fun fetchExchangeRates(): MutableState<ExchangeRateResponse> {
         val call: Call<ExchangeRateResponse> = apiService.getExchangeRates()
         val exchangeRateData: MutableState<ExchangeRateResponse> = mutableStateOf(
             ExchangeRateResponse()
         )
 
         call.enqueue(object : Callback<ExchangeRateResponse> {
-            override fun onResponse (
+            override fun onResponse(
                 call: Call<ExchangeRateResponse>,
                 response: Response<ExchangeRateResponse>
             ) {
@@ -69,12 +69,13 @@ class NetworkRetrofitRepository : RetrofitRepository {
         return exchangeRateData
     }
 
-    override fun getNearbyAtms(location: String): MutableState<MutableList<GoogleMapsApiResponse>> {
+    override fun getNearbyAtms(
+        location: String,
+        callback: (List<GoogleMapsApiResponse>) -> Unit
+    ) {
         val call: Call<Any> = mapsApiService.getNearbyAtms(location)
-        val nearbyAtmsData: MutableState<MutableList<GoogleMapsApiResponse>> = mutableStateOf(mutableListOf())
-
         call.enqueue(object : Callback<Any> {
-            override fun onResponse (
+            override fun onResponse(
                 call: Call<Any>,
                 response: Response<Any>
             ) {
@@ -83,29 +84,32 @@ class NetworkRetrofitRepository : RetrofitRepository {
                         val jsonString = Gson().toJson(response.body())
                         val jsonObject = JsonParser().parse(jsonString).asJsonObject
                         val resultsArray = jsonObject.getAsJsonArray("results")
-                        resultsArray?.forEach { resultItem ->
-                            val name = resultItem.asJsonObject.getAsJsonPrimitive("name")?.asString ?: ""
-                            val location = resultItem.asJsonObject.getAsJsonObject("geometry").getAsJsonObject("location")
+                        resultsArray.map { resultItem ->
+                            val name =
+                                resultItem.asJsonObject.getAsJsonPrimitive("name")?.asString ?: ""
+                            val location = resultItem.asJsonObject.getAsJsonObject("geometry")
+                                .getAsJsonObject("location")
                             val lat = location?.getAsJsonPrimitive("lat")?.asDouble ?: 0.0
                             val lng = location?.getAsJsonPrimitive("lng")?.asDouble ?: 0.0
-                            nearbyAtmsData.value.add(
-                                GoogleMapsApiResponse(
-                                    name = name,
-                                    location = listOf(mapOf("lat" to lat, "lng" to lng))
-                                )
+                            GoogleMapsApiResponse(
+                                name = name,
+                                location = listOf(mapOf("lat" to lat, "lng" to lng))
                             )
+                        }.let {
+                            callback(it)
                         }
                     }
                 } else {
+                    callback(emptyList())
                     println("Error: ${response.code()}")
                 }
             }
 
             override fun onFailure(call: Call<Any>, t: Throwable) {
+                callback(emptyList())
                 println("Network Error: ${t.message}")
             }
         })
-        return nearbyAtmsData
     }
 }
 

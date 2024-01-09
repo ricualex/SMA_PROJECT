@@ -19,10 +19,6 @@ fun AppBar(
     onNavigationIconClicked: () -> Unit
 ) {
     TopAppBar(
-        colors = TopAppBarDefaults.mediumTopAppBarColors(
-            containerColor = Color.Black,
-            titleContentColor = Color.White
-        ),
         title = {
             Text(text = crtScreen.title)
         },

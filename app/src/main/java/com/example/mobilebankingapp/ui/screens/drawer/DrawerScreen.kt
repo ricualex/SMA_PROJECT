@@ -49,7 +49,6 @@ fun DrawerScreen(
     content: @Composable () -> Unit
 ) {
     ModalNavigationDrawer(
-        modifier = Modifier.background(AppColors.PrimaryBackground),
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
@@ -114,7 +113,6 @@ fun DrawerHeader(userProfile: UserProfile) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(AppColors.PrimaryBackground),
     ) {
         Column(
 
@@ -145,7 +143,6 @@ fun DrawerHeader(userProfile: UserProfile) {
 fun DrawerBody(
     items: List<MenuItem>,
     modifier: Modifier = Modifier
-        .background(AppColors.PrimaryBackground)
         .fillMaxSize(),
     itemTextStyle: TextStyle = TextStyle(fontSize = 18.sp, color = AppColors.PrimaryFontColor),
     onItemClick: (MenuItem) -> Unit
