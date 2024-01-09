@@ -17,7 +17,7 @@ class UserViewModel(private val firebaseRepo: FirebaseRepository) : ViewModel() 
         userState = firebaseRepo.getUserData(userId)
     }
 
-    fun addCard(creditCard: CreditCard) = firebaseRepo.addCard(creditCard)
+    fun addCard(creditCard: CreditCard, keyStoreKey: String) = firebaseRepo.addCard(creditCard, keyStoreKey)
 
     fun deleteCard(cardId: String) = firebaseRepo.deleteCard(cardId)
 

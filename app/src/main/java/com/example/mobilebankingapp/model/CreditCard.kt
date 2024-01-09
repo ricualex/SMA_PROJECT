@@ -21,8 +21,8 @@ data class CreditCard(
     val default: Boolean = false
 ) {
 
-    fun encrypt(): CreditCard {
-        val key = getSecretKey("test")
+    fun encrypt(keyStoreKey: String): CreditCard {
+        val key = getSecretKey(keyStoreKey)
         return copy(
             holderName = encryptData(holderName, key),
             panNumber = encryptData(panNumber, key),
@@ -30,8 +30,8 @@ data class CreditCard(
         )
     }
 
-    fun decrypt(): CreditCard {
-        val key = getSecretKey("test")
+    fun decrypt(keyStoreKey: String): CreditCard {
+        val key = getSecretKey(keyStoreKey)
         return copy(
             holderName = decryptData(holderName, key),
             panNumber = decryptData(panNumber, key),
