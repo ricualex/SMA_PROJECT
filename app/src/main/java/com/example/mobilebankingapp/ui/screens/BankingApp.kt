@@ -27,6 +27,8 @@ import com.example.mobilebankingapp.model.UserProfile
 import com.example.mobilebankingapp.ui.screens.cards.CardsScreen
 import com.example.mobilebankingapp.ui.screens.drawer.DrawerScreen
 import com.example.mobilebankingapp.ui.screens.exchange.CurrencyExchangeScreen
+import com.example.mobilebankingapp.ui.screens.help.HelpScreen
+import com.example.mobilebankingapp.ui.screens.help.HelpViewModel
 import com.example.mobilebankingapp.ui.screens.home.ApiViewModel
 import com.example.mobilebankingapp.ui.screens.home.HomeScreen
 import com.example.mobilebankingapp.ui.screens.home.UserViewModel
@@ -36,7 +38,8 @@ import kotlinx.coroutines.launch
 enum class BankingAppScreen(val title: String) {
     Home("Home"),
     Cards("Credit Cards"),
-    Exchange("Currency exchange")
+    Exchange("Currency exchange"),
+    Help("Help")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,6 +52,7 @@ fun BankingApp(
 ) {
     val userViewModel: UserViewModel = viewModel(factory = ViewModelProvider.Factory)
     val apiViewModel: ApiViewModel = viewModel(factory = ViewModelProvider.Factory)
+    val helpViewModel: HelpViewModel = viewModel(factory = ViewModelProvider.Factory)
     userViewModel.updateUserId(userId)
     apiViewModel.updateUserId(userId)
 
@@ -104,7 +108,12 @@ fun BankingApp(
                 },
                 onExchangeClicked = {
                     navController.navigate(BankingAppScreen.Exchange.name)
-                    // TODO: this can be done better
+                    coroutineScope.launch {
+                        drawerState.close()
+                    }
+                },
+                onHelpClicked = {
+                    navController.navigate(BankingAppScreen.Help.name)
                     coroutineScope.launch {
                         drawerState.close()
                     }
@@ -129,6 +138,9 @@ fun BankingApp(
                     }
                     composable(route = BankingAppScreen.Exchange.name) {
                         CurrencyExchangeScreen(exchangeDataViewModel = apiViewModel, dataModel = userData.value)
+                    }
+                    composable(route = BankingAppScreen.Help.name) {
+                        HelpScreen(helpViewModel = helpViewModel)
                     }
                 }
             }

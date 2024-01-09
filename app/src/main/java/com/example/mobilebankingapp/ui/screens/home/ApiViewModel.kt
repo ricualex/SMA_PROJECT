@@ -24,12 +24,6 @@ class ApiViewModel (
     val toastMessage= mutableStateOf("")
     private var userId = mutableStateOf("")
     private lateinit var userState: Flow<UserData>
-//    var selectedFrom = mutableStateOf("")
-//    var selectedTo = mutableStateOf("")
-//    var quantity = mutableIntStateOf(0)
-//    var resultAmount = mutableIntStateOf(0)
-//    var items = mutableListOf<String>()
-
     val exchangeRateDataState: MutableState<ExchangeRateResponse> = try {
             retrofitRepository.fetchExchangeRates()
         }

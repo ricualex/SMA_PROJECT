@@ -45,6 +45,7 @@ fun DrawerScreen(
     onLogOutClicked: () -> Unit,
     onHomeClicked: () -> Unit,
     onExchangeClicked: () -> Unit,
+    onHelpClicked: () -> Unit,
     content: @Composable () -> Unit
 ) {
     ModalNavigationDrawer(
@@ -88,7 +89,7 @@ fun DrawerScreen(
                             title = "Help",
                             contentDescription = "Go To Help",
                             icon = Icons.Default.Info,
-                            onClick = {}
+                            onClick = onHelpClicked
                         ),
                         MenuItem(
                             id = "logout",
