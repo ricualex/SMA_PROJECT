@@ -52,7 +52,7 @@ fun CardsScreen(
             HorizontalPager(state = pagerState, key = { it }) {
                 val cardViewModel: CreditCardViewModel =
                     viewModel(key = cards[it].first, factory = ViewModelProvider.Factory)
-                cardViewModel.creditCard.value = cards[it].second
+                cardViewModel.creditCard.value = cards[it].second.decrypt()
 
                 CreditCardForm(
                     viewModel = cardViewModel,
