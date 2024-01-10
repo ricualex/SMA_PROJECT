@@ -25,18 +25,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.mobilebankingapp.R
 import com.example.mobilebankingapp.ViewModelProvider
 import com.example.mobilebankingapp.model.CreditCard
+import com.example.mobilebankingapp.utils.getSecretKey
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CardsScreen(
     activity: Activity,
     cards: List<Pair<String, CreditCard>>,
-    onCardAdded: (CreditCard) -> Unit,
+    onCardAdded: (CreditCard, String) -> Unit,
     onCardDeleted: (String) -> Unit,
     onCardSetDefault: (String, String?) -> Unit
 ) {
@@ -47,12 +50,13 @@ fun CardsScreen(
         val pagerState = rememberPagerState {
             cards.size
         }
+        val key = stringResource(id = R.string.key_alias)
 
         if (cards.isNotEmpty()) {
             HorizontalPager(state = pagerState, key = { it }) {
                 val cardViewModel: CreditCardViewModel =
                     viewModel(key = cards[it].first, factory = ViewModelProvider.Factory)
-                cardViewModel.creditCard.value = cards[it].second
+                cardViewModel.creditCard.value = cards[it].second.decrypt(key)
 
                 CreditCardForm(
                     viewModel = cardViewModel,
@@ -156,7 +160,7 @@ fun CardsScreen(
 
                             TextButton(
                                 onClick = {
-                                    onCardAdded(newCardViewModel.creditCard.value)
+                                    onCardAdded(newCardViewModel.creditCard.value, key)
                                     showDialog = false
                                     newCardViewModel.resetState()
                                 },
