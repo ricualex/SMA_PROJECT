@@ -87,13 +87,13 @@ fun CardsScreen(
                         val crtDefaultId = cards.find { it.second.default }?.first
                         onCardSetDefault(cards[pagerState.currentPage].first, crtDefaultId)
                     },
-                    enabled = cards.isNotEmpty() && !cards[pagerState.currentPage].second.default
+                    enabled = pagerState.currentPage < cards.size && !cards[pagerState.currentPage].second.default
                 ) {
                     Text(text = "Set as default")
                 }
                 Button(
                     onClick = { onCardDeleted(cards[pagerState.currentPage].first) },
-                    enabled = cards.isNotEmpty()
+                    enabled = pagerState.currentPage < cards.size
                 ) {
                     Text(text = "Delete")
                 }
