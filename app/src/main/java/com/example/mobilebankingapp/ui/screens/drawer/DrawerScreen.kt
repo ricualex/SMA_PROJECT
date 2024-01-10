@@ -84,9 +84,9 @@ fun DrawerScreen(
                             onClick = onExchangeClicked
                         ),
                         MenuItem(
-                            id = "help",
-                            title = "Help",
-                            contentDescription = "Go To Help",
+                            id = "atms",
+                            title = "Atms",
+                            contentDescription = "Go To Atms",
                             icon = Icons.Default.Info,
                             onClick = onHelpClicked
                         ),

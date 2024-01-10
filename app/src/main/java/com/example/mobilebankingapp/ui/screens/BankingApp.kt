@@ -39,7 +39,7 @@ enum class BankingAppScreen(val title: String) {
     Home("Home"),
     Cards("Credit Cards"),
     Exchange("Currency exchange"),
-    Help("Help")
+    Atms("Atms")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -113,7 +113,7 @@ fun BankingApp(
                     }
                 },
                 onHelpClicked = {
-                    navController.navigate(BankingAppScreen.Help.name)
+                    navController.navigate(BankingAppScreen.Atms.name)
                     coroutineScope.launch {
                         drawerState.close()
                     }
@@ -139,7 +139,7 @@ fun BankingApp(
                     composable(route = BankingAppScreen.Exchange.name) {
                         CurrencyExchangeScreen(exchangeDataViewModel = apiViewModel, dataModel = userData.value)
                     }
-                    composable(route = BankingAppScreen.Help.name) {
+                    composable(route = BankingAppScreen.Atms.name) {
                         HelpScreen(helpViewModel = helpViewModel)
                     }
                 }
