@@ -7,7 +7,11 @@ import androidx.fragment.app.FragmentActivity
 
 
 fun biometricAuth(context: Context, authCallBack: (Boolean) -> Unit) {
-    val biometricPrompt = BiometricPrompt(context as FragmentActivity,
+    if (context !is FragmentActivity) {
+        authCallBack(false)
+        return
+    }
+    val biometricPrompt = BiometricPrompt(context,
         object : BiometricPrompt.AuthenticationCallback() {
             override fun onAuthenticationError(
                 errorCode: Int,

@@ -61,19 +61,6 @@ fun BoldTextComponent(value: String) {
 }
 
 @Composable
-fun RoundBox(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit = {}
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-    ) {
-        content()
-    }
-}
-
-@Composable
 fun RoundGreyButton(value: String, onButtonClick: () -> Unit, modifier: Modifier = Modifier) {
     Button(
         onClick = onButtonClick,

@@ -45,10 +45,10 @@ fun DrawerScreen(
     onLogOutClicked: () -> Unit,
     onHomeClicked: () -> Unit,
     onExchangeClicked: () -> Unit,
+    onHelpClicked: () -> Unit,
     content: @Composable () -> Unit
 ) {
     ModalNavigationDrawer(
-        modifier = Modifier.background(AppColors.PrimaryBackground),
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
@@ -84,11 +84,11 @@ fun DrawerScreen(
                             onClick = onExchangeClicked
                         ),
                         MenuItem(
-                            id = "help",
-                            title = "Help",
-                            contentDescription = "Go To Help",
+                            id = "atms",
+                            title = "Atms",
+                            contentDescription = "Go To Atms",
                             icon = Icons.Default.Info,
-                            onClick = {}
+                            onClick = onHelpClicked
                         ),
                         MenuItem(
                             id = "logout",
@@ -113,7 +113,6 @@ fun DrawerHeader(userProfile: UserProfile) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(AppColors.PrimaryBackground),
     ) {
         Column(
 
@@ -144,7 +143,6 @@ fun DrawerHeader(userProfile: UserProfile) {
 fun DrawerBody(
     items: List<MenuItem>,
     modifier: Modifier = Modifier
-        .background(AppColors.PrimaryBackground)
         .fillMaxSize(),
     itemTextStyle: TextStyle = TextStyle(fontSize = 18.sp, color = AppColors.PrimaryFontColor),
     onItemClick: (MenuItem) -> Unit

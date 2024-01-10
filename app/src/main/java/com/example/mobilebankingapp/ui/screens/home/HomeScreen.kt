@@ -1,29 +1,23 @@
 package com.example.mobilebankingapp.ui.screens.home
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,19 +26,15 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.text.isDigitsOnly
 import com.example.mobilebankingapp.R
 import com.example.mobilebankingapp.components.AppFonts
 import com.example.mobilebankingapp.components.RoundGreyButton
 import com.example.mobilebankingapp.model.ExchangeRateResponse
 import com.example.mobilebankingapp.model.UserData
 import com.example.mobilebankingapp.model.UserProfile
-import androidx.compose.material3.TextField
-import androidx.compose.runtime.*
-import androidx.core.text.isDigitsOnly
 
 @Composable
 fun HomeScreen(
@@ -69,6 +59,7 @@ fun HomeScreen(
                     println(exchangeData)
                 })
             }
+            Spacer(modifier = Modifier.height(20.dp))
             ApiBox(apiExchangeRateData = exchangeData)
         }
     }
@@ -77,9 +68,11 @@ fun HomeScreen(
 @Composable
 fun WelcomeBox(userProfile: UserProfile, firebaseDataState: UserData) {
     Column {
+        Spacer(modifier = Modifier.height(30.dp))
         Card(
             modifier = Modifier
-                .size(200.dp),
+                .width(250.dp)
+                .height(100.dp),
             content = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,

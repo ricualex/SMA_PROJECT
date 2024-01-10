@@ -5,6 +5,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.mobilebankingapp.ui.screens.cards.CreditCardViewModel
+import com.example.mobilebankingapp.ui.screens.help.HelpViewModel
+import com.example.mobilebankingapp.ui.screens.help.LocationHandler
 import com.example.mobilebankingapp.ui.screens.home.ApiViewModel
 import com.example.mobilebankingapp.ui.screens.home.UserViewModel
 import com.example.mobilebankingapp.ui.screens.signin.SignInViewModel
@@ -30,6 +32,12 @@ object ViewModelProvider {
             val retrofitRepo = getApplication().container.retrofitRepository
             val firebaseRepo = getApplication().container.firebaseRepository
             ApiViewModel(retrofitRepo, firebaseRepo)
+        }
+        initializer {
+            val app = getApplication()
+            val retrofitRepo = app.container.retrofitRepository
+            val locationHandler = LocationHandler(app.applicationContext)
+            HelpViewModel(retrofitRepo, locationHandler)
         }
     }
 
