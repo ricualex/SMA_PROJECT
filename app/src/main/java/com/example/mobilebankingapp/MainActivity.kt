@@ -1,8 +1,6 @@
 package com.example.mobilebankingapp
 
 import android.Manifest
-import android.app.PendingIntent
-import android.content.BroadcastReceiver
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
@@ -23,17 +21,13 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.mobilebankingapp.ui.screens.BankingApp
 import com.example.mobilebankingapp.ui.screens.help.HelpViewModel
-import com.example.mobilebankingapp.ui.screens.help.LocationHandler
 import com.example.mobilebankingapp.ui.screens.signin.SignInViewModel
 import com.example.mobilebankingapp.ui.screens.signin.SingInScreen
 import com.example.mobilebankingapp.ui.theme.MobileBankingAppTheme
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.FirebaseApp
 import kotlinx.coroutines.launch
 
-class MainActivity :  FragmentActivity() {
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         FirebaseApp.initializeApp(this)
         super.onCreate(savedInstanceState)
@@ -43,7 +37,8 @@ class MainActivity :  FragmentActivity() {
                     modifier = Modifier.fillMaxSize(),
                 ) {
                     val viewModel: SignInViewModel = viewModel(factory = ViewModelProvider.Factory)
-                    val helpViewModel: HelpViewModel = viewModel(factory = ViewModelProvider.Factory)
+                    val helpViewModel: HelpViewModel =
+                        viewModel(factory = ViewModelProvider.Factory)
                     val coroutineScope = rememberCoroutineScope();
                     val signInState = viewModel.state.collectAsState()
 
@@ -110,6 +105,7 @@ class MainActivity :  FragmentActivity() {
             }
         }
     }
+
     override fun onResume() {
         super.onResume()
 
@@ -121,6 +117,7 @@ class MainActivity :  FragmentActivity() {
             )
         }
     }
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
@@ -128,6 +125,7 @@ class MainActivity :  FragmentActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
+
     private val isLocationPermissionGranted: Boolean
         get() = ContextCompat.checkSelfPermission(
             this,
