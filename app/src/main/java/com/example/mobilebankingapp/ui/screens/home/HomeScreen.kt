@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -89,13 +90,15 @@ fun HomeScreen(
                         RegisterTextField(labelText = "BirthDate", text = birthDate) {
                             birthDate = it
                         }
+                        val key = stringResource(id = R.string.key_alias)
                         RoundGreyButton(value = "Confirm", onButtonClick = {
                             needToCompleteRegisterDialog = false
                             userViewModel.submitRegister(
                                 firstName = firstName,
                                 lastName = lastName,
                                 cnp = cnp,
-                                birthDate = birthDate
+                                birthDate = birthDate,
+                                keyStoreKey = key
                             )
                         })
                     }

@@ -17,9 +17,9 @@ class UserViewModel(private val firebaseRepo: FirebaseRepository) : ViewModel() 
         registrationData = UserData()
     }
 
-    fun submitRegister(firstName: String, lastName: String, cnp: String, birthDate: String) {
+    fun submitRegister(firstName: String, lastName: String, cnp: String, birthDate: String, keyStoreKey: String) {
         registrationData = UserData(firstName = firstName, lastName = lastName, cnp = cnp, birthDate = birthDate, balance = mapOf("RON" to 0.0))
-        firebaseRepo.registerUser(registrationData)
+        firebaseRepo.registerUser(registrationData.encrypt(keyStoreKey))
 
     }
 
