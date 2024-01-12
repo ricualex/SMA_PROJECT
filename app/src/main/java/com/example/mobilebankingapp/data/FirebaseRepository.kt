@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import com.example.mobilebankingapp.model.CreditCard
 import com.example.mobilebankingapp.model.UserData
+import com.example.mobilebankingapp.model.UserProfile
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -21,6 +22,8 @@ interface FirebaseRepository {
     fun deleteCard(cardId: String)
     fun setDefaultCard(cardId: String, prevCardId: String? = null)
     fun updateBalance(currencyFrom: String, currencyTo: String, amountFrom: Double, amountTo: Double)
+
+    fun registerUser(userProfile: UserData)
 }
 
 class NetworkFirebaseRepository : FirebaseRepository {
@@ -51,6 +54,13 @@ class NetworkFirebaseRepository : FirebaseRepository {
     }
 
     override fun addUser(userData: UserData) {
+        val database: FirebaseDatabase = FirebaseDatabase.getInstance()
+        val databaseRef: DatabaseReference = database.getReference("users")
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        databaseRef.child(userId!!).setValue(userData)
+    }
+
+    override fun registerUser(userData: UserData) {
         val database: FirebaseDatabase = FirebaseDatabase.getInstance()
         val databaseRef: DatabaseReference = database.getReference("users")
         val userId = FirebaseAuth.getInstance().currentUser?.uid

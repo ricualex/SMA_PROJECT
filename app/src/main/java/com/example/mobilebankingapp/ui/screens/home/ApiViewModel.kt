@@ -58,7 +58,8 @@ class ApiViewModel (
             if (it != null && it > amount) {
                 val resultAmount = getConversionAmount(amount, currencyFrom, currencyTo)
                 val remainingBalance = it - amount
-                firebaseRepository.updateBalance(currencyFrom, currencyTo, remainingBalance, resultAmount)
+                val destinationBalance = dataModel.balance[currencyTo]!! + resultAmount
+                firebaseRepository.updateBalance(currencyFrom, currencyTo, remainingBalance, destinationBalance)
                 return 1
             }
         }

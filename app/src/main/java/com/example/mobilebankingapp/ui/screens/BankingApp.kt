@@ -32,6 +32,8 @@ import com.example.mobilebankingapp.ui.screens.help.HelpViewModel
 import com.example.mobilebankingapp.ui.screens.home.ApiViewModel
 import com.example.mobilebankingapp.ui.screens.home.HomeScreen
 import com.example.mobilebankingapp.ui.screens.home.UserViewModel
+import com.example.mobilebankingapp.ui.screens.transfer.TransferScreen
+import com.example.mobilebankingapp.ui.screens.transfer.TransferViewModel
 import kotlinx.coroutines.launch
 
 
@@ -39,7 +41,8 @@ enum class BankingAppScreen(val title: String) {
     Home("Home"),
     Cards("Credit Cards"),
     Exchange("Currency exchange"),
-    Atms("Atms")
+    Atms("Atms"),
+    Transfer("Transfer")
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -53,8 +56,11 @@ fun BankingApp(
     val userViewModel: UserViewModel = viewModel(factory = ViewModelProvider.Factory)
     val apiViewModel: ApiViewModel = viewModel(factory = ViewModelProvider.Factory)
     val helpViewModel: HelpViewModel = viewModel(factory = ViewModelProvider.Factory)
+    val transferViewModel: TransferViewModel = viewModel(factory = ViewModelProvider.Factory)
+
     userViewModel.updateUserId(userId)
     apiViewModel.updateUserId(userId)
+    transferViewModel.updateUserId(userId)
 
     val userData = userViewModel.userState.collectAsState(
         UserData()
@@ -118,6 +124,12 @@ fun BankingApp(
                         drawerState.close()
                     }
                 },
+                onTransferClicked = {
+                    navController.navigate(BankingAppScreen.Transfer.name)
+                    coroutineScope.launch {
+                        drawerState.close()
+                    }
+                },
                 onLogOutClicked = onLogOutClicked
             ) {
                 NavHost(
@@ -125,7 +137,7 @@ fun BankingApp(
                     startDestination = BankingAppScreen.Home.name
                 ) {
                     composable(route = BankingAppScreen.Home.name) {
-                        HomeScreen(userProfile = userProfile, dataModel = userData.value, exchangeData = exchangeData)
+                        HomeScreen(userProfile = userProfile, dataModel = userData.value, exchangeData = exchangeData, userViewModel = userViewModel)
                     }
                     composable(route = BankingAppScreen.Cards.name) {
                         CardsScreen(
@@ -141,6 +153,9 @@ fun BankingApp(
                     }
                     composable(route = BankingAppScreen.Atms.name) {
                         HelpScreen(helpViewModel = helpViewModel)
+                    }
+                    composable(route = BankingAppScreen.Transfer.name) {
+                        TransferScreen(transferViewModel = transferViewModel)
                     }
                 }
             }
