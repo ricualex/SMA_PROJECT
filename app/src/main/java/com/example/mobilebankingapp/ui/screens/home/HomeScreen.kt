@@ -1,6 +1,7 @@
 package com.example.mobilebankingapp.ui.screens.home
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.core.text.isDigitsOnly
 import com.example.mobilebankingapp.R
 import com.example.mobilebankingapp.components.AppFonts
@@ -40,12 +42,69 @@ import com.example.mobilebankingapp.model.UserProfile
 fun HomeScreen(
     userProfile: UserProfile,
     dataModel: UserData,
-    exchangeData: ExchangeRateResponse
+    exchangeData: ExchangeRateResponse,
+    userViewModel: UserViewModel
 ) {
+    var needToCompleteRegisterDialog by remember { mutableStateOf(true) }
+    var firstName by remember { mutableStateOf("") }
+    var lastName by remember { mutableStateOf("") }
+    var cnp by remember { mutableStateOf("") }
+    var birthDate by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
+        dataModel.takeIf {
+            it.firstName.isNullOrEmpty() ||
+                    it.cnp.isNullOrEmpty() ||
+                    it.lastName.isNullOrEmpty() ||
+                    it.birthDate.isNullOrEmpty()
+
+        }?.let {
+            if (needToCompleteRegisterDialog) {
+                Dialog(onDismissRequest = {
+                    needToCompleteRegisterDialog = false
+                }) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(text = "Before using our app, we need to finalize your registration.")
+                        Text(text = "Please provide us the following informations. All data will be kept in privacy")
+                        RegisterTextField(labelText = "FirstName", text = firstName) {
+                            firstName = it
+                        }
+                        Spacer(modifier = Modifier.height(30.dp))
+                        RegisterTextField(labelText = "LastName", text = lastName) {
+                            lastName = it
+                        }
+                        Spacer(modifier = Modifier.height(30.dp))
+                        RegisterTextField(labelText = "CNP", text = cnp) {
+                            cnp = it
+                        }
+                        Spacer(modifier = Modifier.height(30.dp))
+                        RegisterTextField(labelText = "BirthDate", text = birthDate) {
+                            birthDate = it
+                        }
+                        RoundGreyButton(value = "Confirm", onButtonClick = {
+                            needToCompleteRegisterDialog = false
+                            userViewModel.submitRegister(
+                                firstName = firstName,
+                                lastName = lastName,
+                                cnp = cnp,
+                                birthDate = birthDate
+                            )
+                        })
+                    }
+
+                }
+            }
+
+        }
+
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -97,6 +156,7 @@ fun WelcomeBox(userProfile: UserProfile, firebaseDataState: UserData) {
         )
     }
 }
+
 @Composable
 fun ApiBox(apiExchangeRateData: ExchangeRateResponse) {
     var currencyFrom by remember { mutableStateOf("0") }
@@ -115,8 +175,7 @@ fun ApiBox(apiExchangeRateData: ExchangeRateResponse) {
                 val convertedValue = it.toDouble() * apiExchangeRateData.rates["USD"]!!
                 currencyFrom = it
                 currencyTo = convertedValue.toString()
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 currencyTo = "0"
                 currencyFrom = "0"
@@ -135,8 +194,7 @@ fun ApiBox(apiExchangeRateData: ExchangeRateResponse) {
                 val convertedValue = it.toDouble() / apiExchangeRateData.rates["USD"]!!
                 currencyTo = it
                 currencyFrom = convertedValue.toString()
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 e.printStackTrace()
                 currencyTo = "0"
                 currencyFrom = "0"
@@ -195,4 +253,36 @@ fun CurrencyRow(
             onValueChange(it)
         }
     }
+}
+
+@Composable
+fun RegisterForm(
+    needToCompleteRegisterDialog: Boolean,
+    onFirstNameChange: (String) -> Unit,
+    onLastNameChange: (String) -> Unit,
+    onCNPChange: (String) -> Unit,
+    onBirthDateChange: (String) -> Unit,
+) {
+    Column(
+
+    ) {
+    }
+}
+
+@Composable
+fun RegisterTextField(
+    labelText: String,
+    text: String,
+    onValueChange: (String) -> Unit
+) {
+    TextField(
+        value = text,
+        onValueChange = {
+            onValueChange(it)
+        },
+        label = { Text(text = labelText, style = TextStyle(fontSize = 20.sp)) },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+        textStyle = TextStyle(fontSize = 20.sp, color = Color.White),
+        singleLine = true
+    )
 }

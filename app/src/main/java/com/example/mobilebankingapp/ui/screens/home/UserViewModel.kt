@@ -11,13 +11,25 @@ import kotlinx.coroutines.flow.Flow
 class UserViewModel(private val firebaseRepo: FirebaseRepository) : ViewModel() {
     private var userId = mutableStateOf("")
     lateinit var userState: Flow<UserData>
+    lateinit var registrationData: UserData
+
+    fun resetState() {
+        registrationData = UserData()
+    }
+
+    fun submitRegister(firstName: String, lastName: String, cnp: String, birthDate: String) {
+        registrationData = UserData(firstName = firstName, lastName = lastName, cnp = cnp, birthDate = birthDate, balance = mapOf("RON" to 0.0))
+        firebaseRepo.registerUser(registrationData)
+
+    }
 
     fun updateUserId(userId: String) {
         this.userId.value = userId
         userState = firebaseRepo.getUserData(userId)
     }
 
-    fun addCard(creditCard: CreditCard, keyStoreKey: String) = firebaseRepo.addCard(creditCard, keyStoreKey)
+    fun addCard(creditCard: CreditCard, keyStoreKey: String) =
+        firebaseRepo.addCard(creditCard, keyStoreKey)
 
     fun deleteCard(cardId: String) = firebaseRepo.deleteCard(cardId)
 

@@ -32,9 +32,22 @@ interface GoogleMapsApiService {
     ): Call<Any>
 }
 
+interface TransferServerService {
+    @GET("maps/api/place/nearbysearch/json")
+    fun getNearbyAtms(
+        @Query("location") location: String,
+        @Query("radius") radius: Int = 5000,
+        @Query("type") type: String = "atm",
+        @Query("key") key: String = "AIzaSyDvBOWr51gOKB12B3yt_fg3714EdSTCccE"
+
+    ): Call<Any>
+}
+
 interface RetrofitRepository {
     fun fetchExchangeRates(): MutableState<ExchangeRateResponse>
     fun getNearbyAtms(location: String, callback: (List<GoogleMapsApiResponse>) -> Unit)
+
+    fun transferMoney(userFrom: String, userTo: String, amount: Double)
 
 }
 
@@ -111,6 +124,10 @@ class NetworkRetrofitRepository : RetrofitRepository {
             }
         })
     }
+
+    override fun transferMoney(userFrom: String, userTo: String, amount: Double) {
+        TODO("Not yet implemented")
+    }
 }
 
 private class ExchangeRateRetrofitInstance {
@@ -139,6 +156,21 @@ private class GoogleMapsRetrofitInstance {
                 .build()
 
             return retrofit.create(GoogleMapsApiService::class.java)
+        }
+    }
+}
+
+private class TransferServerRetrofitInstance {
+    companion object {
+        private const val SERVER_URL = "http://10.0.2.2:3000/"
+
+        fun create(): ExchangeRateApiService {
+            val retrofit = Retrofit.Builder()
+                .baseUrl(SERVER_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+
+            return retrofit.create(ExchangeRateApiService::class.java)
         }
     }
 }

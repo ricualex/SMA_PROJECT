@@ -125,7 +125,7 @@ fun BankingApp(
                     startDestination = BankingAppScreen.Home.name
                 ) {
                     composable(route = BankingAppScreen.Home.name) {
-                        HomeScreen(userProfile = userProfile, dataModel = userData.value, exchangeData = exchangeData)
+                        HomeScreen(userProfile = userProfile, dataModel = userData.value, exchangeData = exchangeData, userViewModel = userViewModel)
                     }
                     composable(route = BankingAppScreen.Cards.name) {
                         CardsScreen(
