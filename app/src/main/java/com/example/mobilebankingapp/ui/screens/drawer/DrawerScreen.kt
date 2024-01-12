@@ -45,6 +45,7 @@ fun DrawerScreen(
     onLogOutClicked: () -> Unit,
     onHomeClicked: () -> Unit,
     onExchangeClicked: () -> Unit,
+    onTransferClicked: () -> Unit,
     onHelpClicked: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -67,7 +68,7 @@ fun DrawerScreen(
                             title = "Transfer",
                             contentDescription = "Go To Transfer",
                             icon = Icons.Default.Send,
-                            onClick = {}
+                            onClick = onTransferClicked
                         ),
                         MenuItem(
                             id = "cards",

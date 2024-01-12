@@ -256,20 +256,6 @@ fun CurrencyRow(
 }
 
 @Composable
-fun RegisterForm(
-    needToCompleteRegisterDialog: Boolean,
-    onFirstNameChange: (String) -> Unit,
-    onLastNameChange: (String) -> Unit,
-    onCNPChange: (String) -> Unit,
-    onBirthDateChange: (String) -> Unit,
-) {
-    Column(
-
-    ) {
-    }
-}
-
-@Composable
 fun RegisterTextField(
     labelText: String,
     text: String,

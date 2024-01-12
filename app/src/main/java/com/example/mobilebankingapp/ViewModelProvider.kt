@@ -10,6 +10,7 @@ import com.example.mobilebankingapp.ui.screens.help.LocationHandler
 import com.example.mobilebankingapp.ui.screens.home.ApiViewModel
 import com.example.mobilebankingapp.ui.screens.home.UserViewModel
 import com.example.mobilebankingapp.ui.screens.signin.SignInViewModel
+import com.example.mobilebankingapp.ui.screens.transfer.TransferViewModel
 
 object ViewModelProvider {
 
@@ -38,6 +39,11 @@ object ViewModelProvider {
             val retrofitRepo = app.container.retrofitRepository
             val locationHandler = LocationHandler(app.applicationContext)
             HelpViewModel(retrofitRepo, locationHandler)
+        }
+        initializer {
+            val retrofitRepo = getApplication().container.retrofitRepository
+            val firebaseRepo = getApplication().container.firebaseRepository
+            TransferViewModel(retrofitRepo, firebaseRepo)
         }
     }
 
